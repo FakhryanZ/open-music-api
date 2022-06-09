@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo '🏗👷‍♂️ Styling and testing your project before commiting'
+
+npm run pretty-quick --staged
+
+npm run check-format || 
+(
+    echo '🤢🤮🤢🤮 Its Raw - Your styling looks disgusting. 🤢🤮🤢🤮
+            Prettier Check Failed. Run npm format, add changes and try commit again.'
+    false;
+)
+
+npm run check-lint || 
+(
+    echo '😤🏀👋😤Get that weak out of here! 😤🏀👋😤'
+    false;
+)
+
+echo '✅✅✅✅ You win this time... I am committing this now. ✅✅✅✅'
