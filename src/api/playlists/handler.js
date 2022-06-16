@@ -13,6 +13,7 @@ class PlaylistsHandler {
     this.getSongsInPlaylistHandler = this.getSongsInPlaylistHandler.bind(this)
     this.deleteSongInPlaylistHandler =
       this.deleteSongInPlaylistHandler.bind(this)
+    this.getActivitiesHandler = this.getActivitiesHandler.bind(this)
   }
 
   async postPlaylistHandler(request, h) {
@@ -111,7 +112,10 @@ class PlaylistsHandler {
       const { id: playlistId } = request.params
       const { id: credentialId } = request.auth.credentials
 
-      await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId)
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId
+      )
       const playlist = await this._playlistsService.getSongsInPlaylist(
         playlistId
       )
@@ -151,8 +155,18 @@ class PlaylistsHandler {
       const { songId } = request.payload
       const { id: credentialId } = request.auth.credentials
 
-      await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId)
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId
+      )
       await this._playlistsService.deleteSongInPlaylist(playlistId, songId)
+
+      await this._playlistsService.addActivity(
+        playlistId,
+        songId,
+        credentialId,
+        'delete'
+      )
 
       return {
         status: 'success',
@@ -187,11 +201,21 @@ class PlaylistsHandler {
       const { songId } = request.payload
       const { id: credentialId } = request.auth.credentials
 
-      await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId)
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId
+      )
       await this._songsService.getSongById(songId)
       const playlistSongId = await this._playlistsService.addSongInPlaylist(
         playlistId,
         songId
+      )
+
+      await this._playlistsService.addActivity(
+        playlistId,
+        songId,
+        credentialId,
+        'add'
       )
 
       const response = h.response({
@@ -204,6 +228,43 @@ class PlaylistsHandler {
       response.code(201)
 
       return response
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        })
+        response.code(error.statusCode)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      })
+      response.code(500)
+      console.error(error)
+
+      return response
+    }
+  }
+
+  async getActivitiesHandler(request, h) {
+    try {
+      const { id: playlistId } = request.params
+      const { id: credentialId } = request.auth.credentials
+
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId
+      )
+      const activities = await this._playlistsService.getActivities(playlistId)
+
+      return {
+        status: 'success',
+        data: activities,
+      }
     } catch (error) {
       if (error instanceof ClientError) {
         const response = h.response({
