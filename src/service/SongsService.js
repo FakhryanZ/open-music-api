@@ -64,7 +64,7 @@ class SongsService {
 
   async getSongsByAlbumId(albumId) {
     const query = {
-      text: 'SELECT * FROM songs WHERE "albumId" = $1',
+      text: 'SELECT * FROM songs WHERE "album_id" = $1',
       values: [albumId],
     }
 
@@ -80,7 +80,7 @@ class SongsService {
   async editSongById(id, { title, year, genre, performer, duration, albumId }) {
     const updatedAt = new Date().toISOString()
     const query = {
-      text: 'UPDATE songs SET title=$1, year=$2, genre=$3, performer=$4, duration=$5, "albumId"=$6, updated_at=$7 WHERE id=$8 RETURNING id',
+      text: 'UPDATE songs SET title=$1, year=$2, genre=$3, performer=$4, duration=$5, "album_id"=$6, updated_at=$7 WHERE id=$8 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, updatedAt, id],
     }
 
