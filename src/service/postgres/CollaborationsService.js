@@ -1,6 +1,6 @@
 const { nanoid } = require('nanoid')
 const { Pool } = require('pg')
-const InvariantError = require('../exceptions/InvariantError')
+const InvariantError = require('../../exceptions/InvariantError')
 
 class CollaborationsService {
   constructor() {
@@ -52,3 +52,4 @@ class CollaborationsService {
 }
 
 module.exports = CollaborationsService
+

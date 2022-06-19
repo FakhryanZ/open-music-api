@@ -10,7 +10,7 @@
   },
   "rules": {
     "semi": "off",
-    "linebreak-style": ["warn", "windows"],
+    "linebreak-style": ["warn", "unix"],
     "no-console": "off",
     "no-underscore-dangle": "off",
     "indent": ["error", 2]
