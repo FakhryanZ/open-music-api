@@ -248,11 +248,13 @@ class AlbumsHandler {
       const response = h.response({
         status: 'success',
         data: {
-          likes: result,
+          likes: result.likes,
         },
       })
 
-      response.header('X-Data-Source', 'cache')
+      if (result.cache) {
+        response.header('X-Data-Source', 'cache')
+      }
 
       return response
     } catch (error) {

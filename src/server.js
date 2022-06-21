@@ -34,17 +34,20 @@ const StorageService = require('./service/S3/StorageService')
 
 const LikesService = require('./service/postgres/LikesService')
 
+const CacheService = require('./service/redis/CacheService')
+
 require('dotenv').config()
 
 const init = async () => {
   const collaborationsService = new CollaborationsService()
+  const cacheService = new CacheService()
   const albumsService = new AlbumsService()
   const songsService = new SongsService()
   const usersService = new UsersService()
   const authenticationsService = new AuthenticationsService()
   const playlistsService = new PlaylistsService(collaborationsService)
   const storageService = new StorageService()
-  const likesService = new LikesService()
+  const likesService = new LikesService(cacheService)
 
   const server = Hapi.server({
     port: process.env.PORT,
