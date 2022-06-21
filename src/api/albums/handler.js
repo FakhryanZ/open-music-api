@@ -1,17 +1,20 @@
 const ClientError = require('../../exceptions/ClientError')
 
 class AlbumsHandler {
-  constructor(service, songsService, storageService, validation) {
+  constructor(service, songsService, storageService, likesService, validation) {
     this._service = service
     this._validation = validation
     this._songsService = songsService
     this._storageService = storageService
+    this._likesService = likesService
 
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this)
     this.postAlbumHandler = this.postAlbumHandler.bind(this)
     this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this)
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this)
     this.postAlbumCoverByIdHandler = this.postAlbumCoverByIdHandler.bind(this)
+    this.postAlbumLikeHandler = this.postAlbumLikeHandler.bind(this)
+    this.getAlbumLikesHandler = this.getAlbumLikesHandler.bind(this)
   }
 
   async postAlbumHandler(request, h) {
@@ -181,6 +184,87 @@ class AlbumsHandler {
         return response
       }
 
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      })
+      response.code(500)
+      console.error(error)
+
+      return response
+    }
+  }
+
+  async postAlbumLikeHandler(request, h) {
+    try {
+      const { id } = request.params
+      const { id: credentialId } = request.auth.credentials
+
+      await this._service.getAlbumById(id)
+      const isLiked = await this._likesService.checkAlbumLike(id, credentialId)
+
+      if (isLiked) {
+        await this._likesService.addAlbumLike(id, credentialId)
+      } else {
+        await this._likesService.deleteAlbumLike(id, credentialId)
+      }
+
+      const response = h.response({
+        status: 'success',
+        message: isLiked
+          ? `Like ditambah ke album ${id}`
+          : `Like dihapus dari album ${id}`,
+      })
+      response.code(201)
+
+      return response
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        })
+        response.code(error.statusCode)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      })
+      response.code(500)
+      console.error(error)
+
+      return response
+    }
+  }
+
+  async getAlbumLikesHandler(request, h) {
+    try {
+      const { id } = request.params
+      const result = await this._likesService.getAlbumLikes(id)
+
+      const response = h.response({
+        status: 'success',
+        data: {
+          likes: result,
+        },
+      })
+
+      response.header('X-Data-Source', 'cache')
+
+      return response
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        })
+        response.code(error.statusCode)
+
+        return response
+      }
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',

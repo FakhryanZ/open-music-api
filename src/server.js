@@ -32,6 +32,8 @@ const ProducerService = require('./service/rabbitmq/ProducerService')
 const ExportsValidator = require('./validator/exports')
 const StorageService = require('./service/S3/StorageService')
 
+const LikesService = require('./service/postgres/LikesService')
+
 require('dotenv').config()
 
 const init = async () => {
@@ -42,6 +44,7 @@ const init = async () => {
   const authenticationsService = new AuthenticationsService()
   const playlistsService = new PlaylistsService(collaborationsService)
   const storageService = new StorageService()
+  const likesService = new LikesService()
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -85,6 +88,7 @@ const init = async () => {
         service: albumsService,
         songsService,
         storageService,
+        likesService,
         validator: AlbumsValidator,
       },
     },
