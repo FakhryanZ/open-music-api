@@ -17,8 +17,10 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/hapi": "^20.2.2",
+    "@hapi/inert": "^6.0.5",
     "@hapi/jwt": "^2.1.1",
     "amqplib": "^0.10.0",
+    "aws-sdk": "^2.1157.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
